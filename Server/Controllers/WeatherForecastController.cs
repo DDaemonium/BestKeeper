@@ -1,7 +1,10 @@
 namespace Server.Controllers
 {
+    using Domain.Data.Identity;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
+    [Authorize(Roles = RoleConstants.Administrator)]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase

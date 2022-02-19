@@ -1,9 +1,10 @@
 ﻿namespace Server.DataAccess.Models
 {
-    public class ApplicationUserRole
+    public class DishCategory
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public ICollection<ApplicationUser> ApplicationUsers { get; set; }
+        public string Description { get; set; }
+        public ICollection<Dish> Dishes { get; set; }
     }
 }
