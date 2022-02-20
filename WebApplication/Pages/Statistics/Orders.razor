@@ -1,0 +1,19 @@
+﻿@page "/orders"
+@using Domain.Data.Identity
+@using WebApplication.Service.Identity
+
+@inject IdentityManager IdentityManager
+
+<PageTitle>Статистика заказов</PageTitle>
+
+<h3>Статистика заказов</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
+        {
+            return;
+        }
+    }
+}

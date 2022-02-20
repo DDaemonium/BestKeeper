@@ -1,0 +1,23 @@
+﻿@page "/orders/view"
+@using Domain.Data.Identity
+@using WebApplication.Service.Identity
+
+@inject IdentityManager IdentityManager
+
+<PageTitle>Заказ</PageTitle>
+
+<h3>Заказ</h3>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "id")]
+    public Guid? CurrentOrderId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
+        {
+            return;
+        }
+    }
+}

@@ -15,6 +15,11 @@
             _databaseContext = databaseContext;
         }
 
+        public async Task<CategoryInfo> GetCategoryAsync(Guid categoryId)
+        => await _databaseContext.DishCategories.AsNoTracking()
+            .Where(c => c.Id == categoryId)
+            .Select(c => new CategoryInfo { Id = c.Id, Name = c.Name, Description = c.Description }).FirstOrDefaultAsync();
+
         public async Task<List<CategoryInfo>> GetAll() => await _databaseContext.DishCategories.AsNoTracking()
             .Select(c => new CategoryInfo { Id = c.Id, Name = c.Name, Description = c.Description }).ToListAsync();
 

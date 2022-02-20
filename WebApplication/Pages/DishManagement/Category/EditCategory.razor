@@ -1,0 +1,152 @@
+﻿@page "/categories/edit"
+@using Domain.Data.Identity
+@using Domain.Dto.Request.Dish
+@using Domain.Dto.Response.Dish
+@using System.Timers
+@using WebApplication.Service.DishManagement
+@using WebApplication.Service.Identity
+
+@inject IdentityManager IdentityManager
+@inject CategoryService CategoryService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Редактирование категории блюда</PageTitle>
+
+<h3>Редактирование категории блюда</h3>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success" role="alert">
+        @successMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+<a href="categories" class="btn btn-primary">Назад</a>
+
+@if (categoryInfo is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <form style="max-width:800px;">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputName">Название</label>
+                <input @bind-value="@categoryInfo.Name" class="form-control" id="inputName" placeholder="Иван">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputDescription">Описание</label>
+                <textarea @bind="@categoryInfo.Description" class="form-control" id="inputDescription" aria-label="Описание"></textarea>
+            </div>
+        </div>
+        <br />
+        <a @onclick="@UpdateCategpry" class="btn btn-success">Сохранить</a>
+        <a @onclick="@DeleteCategory" class="btn btn-success">Удалить</a>
+    </form>
+}
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "id")]
+    public Guid? CurrentCategoryId { get; set; }
+
+    private CategoryInfo? categoryInfo;
+    private string? successMessage;
+    private string? errorMessage;
+    private System.Timers.Timer? successAlertTimer;
+    private System.Timers.Timer? errorAlertTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
+        {
+            return;
+        }
+
+        if (successAlertTimer is null && errorAlertTimer is null)
+        {
+            successAlertTimer = new System.Timers.Timer(5000);
+            successAlertTimer.Elapsed += (object? sender, ElapsedEventArgs e) =>
+            {
+                successMessage = null;
+                successAlertTimer.Stop();
+            };
+
+            errorAlertTimer = new System.Timers.Timer(5000);
+            errorAlertTimer.Elapsed += (object? sender, ElapsedEventArgs e) =>
+            {
+                errorMessage = null;
+                errorAlertTimer.Stop();
+            };
+        }
+
+        if(CurrentCategoryId is not null)
+        {
+            categoryInfo = await CategoryService.GetCategoryByIdAsync(CurrentCategoryId.Value);
+        }
+    }
+
+    private async Task UpdateCategpry()
+    {
+        if(categoryInfo is null)
+        {
+            return;
+        }
+
+        var category = await CategoryService.UpdateCategoryAsync(new UpdateCategory
+        {
+            Id = categoryInfo.Id,
+            Name = categoryInfo.Name,
+            Description = categoryInfo.Description,
+        });
+
+        if(category is not null)
+        {
+            SetSuccessAlert("Категория успешно изменена.");
+            categoryInfo = category;
+        }
+        else
+        {
+            SetErrorAlert("Произошла ошибка при изменении категории.");
+        }
+    }
+
+    private async Task DeleteCategory()
+    {
+        if(CurrentCategoryId is null)
+        {
+            return;
+        }
+
+        await CategoryService.DeleteCategoryAsync(CurrentCategoryId.Value);
+        NavigationManager.NavigateTo("categories");
+    }
+
+    private void SetSuccessAlert(string message)
+    {
+        if (successAlertTimer is not null)
+        {
+            successAlertTimer.Stop();
+            successMessage = message;
+            successAlertTimer.Start();
+        }
+    }
+
+    private void SetErrorAlert(string message)
+    {
+        if (errorAlertTimer is not null)
+        {
+            errorAlertTimer.Stop();
+            errorMessage = message;
+            errorAlertTimer.Start();
+        }
+    }
+}

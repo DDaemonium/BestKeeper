@@ -1,0 +1,19 @@
+﻿@page "/dishes/create"
+@using Domain.Data.Identity
+@using WebApplication.Service.Identity
+
+@inject IdentityManager IdentityManager
+
+<PageTitle>Добавление блюда</PageTitle>
+
+<h3>Добавление блюда</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
+        {
+            return;
+        }
+    }
+}

@@ -1,0 +1,19 @@
+﻿@page "/tables/create"
+@using Domain.Data.Identity
+@using WebApplication.Service.Identity
+
+@inject IdentityManager IdentityManager
+
+<PageTitle>Добавление стола</PageTitle>
+
+<h3>Добавление стола</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
+        {
+            return;
+        }
+    }
+}

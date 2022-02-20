@@ -1,0 +1,23 @@
+﻿@page "/dishes/edit"
+@using Domain.Data.Identity
+@using WebApplication.Service.Identity
+
+@inject IdentityManager IdentityManager
+
+<PageTitle>Редактирование блюда</PageTitle>
+
+<h3>Редактирование блюда</h3>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "id")]
+    public Guid? CurrentDishId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
+        {
+            return;
+        }
+    }
+}

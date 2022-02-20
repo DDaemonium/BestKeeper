@@ -21,6 +21,16 @@
         [HttpGet]
         public async Task<IActionResult> GetAll() => Ok(await _categoryService.GetAll());
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id) => Ok(await _categoryService.GetCategoryAsync(id));
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _categoryService.DeleteCategoryAsync(id);
+            return Ok();
+        }
+
         [HttpPost("create")]
         public async Task<IActionResult> Create(NewCategory newCategory)
         {

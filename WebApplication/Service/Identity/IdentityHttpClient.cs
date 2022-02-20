@@ -97,6 +97,12 @@
             return default;
         }
 
+        public async Task DeleteAsync(string? requestUri)
+        {
+            AddAuthorizationHeader();
+            await _httpClient.DeleteAsync(requestUri);
+        }
+
         private void AddAuthorizationHeader()
         {
             if (!_identityService.IsAuthorized)

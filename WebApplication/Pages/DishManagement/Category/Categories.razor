@@ -1,0 +1,62 @@
+﻿@page "/categories"
+@using Domain.Data.Identity
+@using Domain.Dto.Response.Dish
+@using WebApplication.Service.DishManagement
+@using WebApplication.Service.Identity
+
+@inject IdentityManager IdentityManager
+@inject CategoryService CategoryService
+
+<PageTitle>Категории блюд</PageTitle>
+
+<h3>Категории блюд</h3>
+
+@if (categories is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <a href="categories/create" class="btn btn-success">Добавить</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Редактировать</th>
+                <th>Название</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var category in categories)
+            {
+                <tr>
+                    <td><a href="@($"categories/edit?id={category.Id}")">Открыть</a></td>
+                    <td>@category.Name</td>
+                    <td><button @onclick=@(() => DeleteCategory(category)) type="button" class="btn alert-danger">Удалить</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<CategoryInfo>? categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
+        {
+            return;
+        }
+
+        categories = await CategoryService.GetAllCategoriesAsync();
+    }
+
+    private async Task DeleteCategory(CategoryInfo categoryInfo)
+    {
+        await CategoryService.DeleteCategoryAsync(categoryInfo.Id);
+        categories?.Remove(categoryInfo);
+    }
+}

@@ -1,0 +1,19 @@
+﻿@page "/categories/create"
+@using Domain.Data.Identity
+@using WebApplication.Service.Identity
+
+@inject IdentityManager IdentityManager
+
+<PageTitle>Добавление категории блюда</PageTitle>
+
+<h3>Добавление категории блюда</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
+        {
+            return;
+        }
+    }
+}
