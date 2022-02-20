@@ -43,8 +43,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        IdentityManager.RequireAuthorization();
-        if(!IdentityManager.IsAuthorized)
+        if(!IdentityManager.CheckAuthorizationWithRedirect())
         {
             return;
         }

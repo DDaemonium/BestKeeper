@@ -1,4 +1,8 @@
 ﻿@page "/counter"
+@using Domain.Data.Identity
+@using WebApplication.Service.Identity
+
+@inject IdentityManager IdentityManager
 
 <PageTitle>Counter</PageTitle>
 
@@ -10,6 +14,11 @@
 
 @code {
     private int currentCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Manager, RoleConstants.Waiter);
+    }
 
     private void IncrementCount()
     {

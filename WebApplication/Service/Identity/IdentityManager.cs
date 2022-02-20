@@ -26,18 +26,26 @@
             set => _localStorage.SetItemAsString(JwtKey, value);
         }
 
-        public void RequireAuthorization()
+        /// <summary>
+        /// Check if user authorized otherwise redirect to login page.
+        /// </summary>
+        /// <param name="roles">Availabel roles.</param>
+        /// <returns>true if user is authorized otherwise false.</returns>
+        public bool CheckAuthorizationWithRedirect(params string[] roles)
         {
-            if(!IsAuthorized)
+            if(!IsUserInRole(roles))
             {
                 _navigationManager.NavigateTo($"{_loginRedirectPath}?returnUrl={Uri.EscapeDataString(_navigationManager.Uri)}");
+                return false;
             }
+
+            return true;
         }
 
         public bool IsAuthorized => !string.IsNullOrEmpty(Jwt);
 
         public Identity Identity => IsAuthorized ? new(_handler.ReadJwtToken(Jwt)) : null;
 
-        public bool IsUserInRole(string role) => IsAuthorized && Identity.Role.Equals(role);
+        public bool IsUserInRole(params string[] roles) => !roles.Any() || (IsAuthorized && roles.Contains(Identity.Role));
     }
 }
