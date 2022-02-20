@@ -1,19 +1,51 @@
 ﻿@page "/categories/create"
 @using Domain.Data.Identity
+@using Domain.Dto.Request.Dish
+@using WebApplication.Service.DishManagement
 @using WebApplication.Service.Identity
 
 @inject IdentityManager IdentityManager
+@inject NavigationManager NavigationManager
+@inject CategoryService CategoryService
 
 <PageTitle>Добавление категории блюда</PageTitle>
 
 <h3>Добавление категории блюда</h3>
 
+<a href="categories" class="btn btn-primary">Назад</a>
+
+<form style="max-width:800px;">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputName">Название</label>
+                <input @bind-value="@newCategory.Name" class="form-control" id="inputName" placeholder="Горячие блюда">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputDescription">Описание</label>
+                <textarea @bind="@newCategory.Description" class="form-control" id="inputDescription" aria-label="Описание"></textarea>
+            </div>
+        </div>
+        <br />
+        <a @onclick="@CreateCategpry" class="btn btn-success">Добавить</a>
+    </form>
+
 @code {
+    private NewCategory newCategory = new();
+
     protected override async Task OnInitializedAsync()
     {
         if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
         {
             return;
+        }
+    }
+
+    public async Task CreateCategpry()
+    {
+        var category = await CategoryService.CreateCategoryAsync(newCategory);
+        if (category is not null)
+        {
+            NavigationManager.NavigateTo($"categories/edit?id={category.Id}");
         }
     }
 }

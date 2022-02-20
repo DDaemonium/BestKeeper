@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using WebApplication;
+using WebApplication.Service.DishManagement;
 using WebApplication.Service.Identity;
 using WebApplication.Service.UserManagement;
 

@@ -40,7 +40,7 @@ else
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="inputName">Название</label>
-                <input @bind-value="@categoryInfo.Name" class="form-control" id="inputName" placeholder="Иван">
+                <input @bind-value="@categoryInfo.Name" class="form-control" id="inputName" placeholder="Горячие блюда">
             </div>
             <div class="form-group col-md-6">
                 <label for="inputDescription">Описание</label>
@@ -49,7 +49,7 @@ else
         </div>
         <br />
         <a @onclick="@UpdateCategpry" class="btn btn-success">Сохранить</a>
-        <a @onclick="@DeleteCategory" class="btn btn-success">Удалить</a>
+        <a @onclick="@DeleteCategory" class="btn btn-danger">Удалить</a>
     </form>
 }
 
