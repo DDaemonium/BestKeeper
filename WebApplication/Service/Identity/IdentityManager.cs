@@ -33,7 +33,7 @@
         /// <returns>true if user is authorized otherwise false.</returns>
         public bool CheckAuthorizationWithRedirect(params string[] roles)
         {
-            if(!IsUserInRole(roles))
+            if(!IsAuthorized || !IsUserInRole(roles))
             {
                 _navigationManager.NavigateTo($"{_loginRedirectPath}?returnUrl={Uri.EscapeDataString(_navigationManager.Uri)}");
                 return false;

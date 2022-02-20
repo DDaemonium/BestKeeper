@@ -1,7 +1,5 @@
-﻿namespace Server.Data.Identity
+﻿namespace Domain.Data.Identity
 {
-    using Domain.Data.Identity;
-
     public class Roles
     {
         public Role Administrator { get; } = new(Guid.Parse("53be8d81-2725-4c34-8d56-6ee936e76c30"), RoleConstants.Administrator);

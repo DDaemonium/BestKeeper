@@ -8,6 +8,10 @@
         public string Password { get; set;}
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        /// <summary>
+        /// true if user is hired or false if fired.
+        /// </summary>
+        public bool IsActive { get; set; } 
         public Guid ApplicationUserRoleId { get; set; }
         public ApplicationUserRole ApplicationUserRole { get; set; }
         public ICollection<Order> Orders { get; set; }

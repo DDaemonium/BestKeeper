@@ -1,0 +1,78 @@
+﻿@page "/users/create"
+@using Domain.Data.Identity
+@using Domain.Dto.Request.Identity
+@using WebApplication.Service.Identity
+@using WebApplication.Service.UserManagement
+@using WebApplication.Util
+
+@inject IdentityManager IdentityManager
+@inject UsersService UsersService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Регистрация пользователя</PageTitle>
+
+<h3>Регистрация пользователя</h3>
+
+<a href="users" class="btn btn-primary">Назад</a>
+
+<form style="max-width:800px;">
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="inputName">Имя</label>
+            <input @bind-value="@newUser.Name" class="form-control" id="inputName" placeholder="Иван">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="inputSurname">Фамилия</label>
+            <input @bind-value="@newUser.Surname" class="form-control" id="inputSurname" placeholder="Иванов">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="inputEmail">Email</label>
+            <input @bind-value="@newUser.Email" type="email" class="form-control" id="inputEmail" placeholder="example@example.com">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="inputPhone">Телефон</label>
+            <input @bind-value="@newUser.PhoneNumber" class="form-control" id="inputPhone" placeholder="88005553535">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="inputPassword">Пароль</label>
+            <input @bind-value="@newUser.Password" type="password" class="form-control" id="inputPassword">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-2">
+            <label for="inputRole">Должность</label>
+            <select style="min-width:150px;" @bind="@role" id="inputRole" class="form-control">
+                <option selected>@RoleManager.GetRoleViewName(RoleConstants.Administrator)</option>
+                <option>@RoleManager.GetRoleViewName(RoleConstants.Manager)</option>
+                <option>@RoleManager.GetRoleViewName(RoleConstants.Waiter)</option>
+            </select>
+        </div>
+    </div>
+    <br />
+    <a @onclick="@RegisterUser" class="btn btn-success">Зарегистрировать</a>
+</form>
+
+@code {
+    private NewUser newUser = new();
+    private string role = RoleConstants.Administrator;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator))
+        {
+            return;
+        }
+    }
+
+    private async Task RegisterUser()
+    {
+        newUser.RoleId = RoleManager.GetRoleId(role);
+        var createdUser = await UsersService.RegisterAsync(newUser);
+        if (createdUser is not null)
+        {
+            NavigationManager.NavigateTo($"users/edit?id={createdUser.Id}");
+        }
+    }
+}

@@ -1,7 +1,7 @@
 ﻿namespace Server.DataAccess
 {
+    using Domain.Data.Identity;
     using Microsoft.EntityFrameworkCore;
-    using Server.Data.Identity;
     using Server.DataAccess.Models;
 
     public class DatabaseContext : DbContext
@@ -37,6 +37,7 @@
                 e.HasOne(u => u.ApplicationUserRole).WithMany(r => r.ApplicationUsers)
                 .HasForeignKey(up => up.ApplicationUserRoleId).OnDelete(DeleteBehavior.NoAction);
 
+                // Default user
                 e.HasData(new ApplicationUser 
                 { 
                     Id = Guid.Parse("53be8d81-2725-4c34-8d56-6ee936e76c31"),
@@ -46,6 +47,7 @@
                     Email = "admin@admin.admin",
                     Password = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", // admin
                     ApplicationUserRoleId = roles.Administrator.Id,
+                    IsActive = true,
                 });
 
             });

@@ -17,8 +17,21 @@
             _databaseContext = databaseContext;
         }
 
+        public async Task<List<IdentityUser>> GetAllUsersAsync()
+        => await _databaseContext.ApplicationUsers.AsNoTracking()
+            .Select(u => new IdentityUser
+            {
+                Email = u.Email,
+                Id = u.Id,
+                Name = u.Name,
+                Surname = u.Surname,
+                PhoneNumber = u.PhoneNumber,
+                Role = u.ApplicationUserRole.Name,
+                IsActive = u.IsActive,
+            }).ToListAsync();
+
         public async Task<IdentityUser> GetUserByIdAsync(Guid id)
-        => await _databaseContext.ApplicationUsers.Where(u => u.Id == id)
+        => await _databaseContext.ApplicationUsers.Where(u => u.Id == id).AsNoTracking()
                 .Select(u => new IdentityUser {
                     Email = u.Email,
                     Id = u.Id,
@@ -26,13 +39,14 @@
                     Surname = u.Surname,
                     PhoneNumber = u.PhoneNumber,
                     Role = u.ApplicationUserRole.Name,
-                    }).FirstOrDefaultAsync();
+                    IsActive = u.IsActive,
+                }).FirstOrDefaultAsync();
 
         public async Task<IdentityUser> LoginAsync(LoginInfo loginInfo)
         {
             var passwordHash = this.EncryptPassword(loginInfo.Password);
             return await _databaseContext.ApplicationUsers.Where(
-                u => u.Email.Equals(loginInfo.Email) && u.Password.Equals(passwordHash))
+                u => u.Email.Equals(loginInfo.Email) && u.Password.Equals(passwordHash) && u.IsActive)
                 .Select(u => new IdentityUser
                 {
                     Email = u.Email,
@@ -41,6 +55,7 @@
                     Surname = u.Surname,
                     PhoneNumber = u.PhoneNumber,
                     Role = u.ApplicationUserRole.Name,
+                    IsActive = u.IsActive,
                 }).FirstOrDefaultAsync();
         }
 
@@ -58,24 +73,46 @@
             return await _databaseContext.SaveChangesAsync() > 0;
         }
 
-        public async Task<IdentityUser> ChangeUserRoleAsync(Guid userId, Guid newRoleId)
+        public async Task<ResetPasswrdMessage> ResetPasswordAsync(ChangeUserPassword changeUserPassword)
         {
-            var user = await _databaseContext.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _databaseContext.ApplicationUsers
+                .FirstOrDefaultAsync(u => u.Id == changeUserPassword.UserId && u.Password.Equals(EncryptPassword(changeUserPassword.OldPassword)));
+
+            if (user is null)
+            {
+                return new ResetPasswrdMessage { IsSuccess = false, Message = "Incorrect password." };
+            }
+
+            user.Password = EncryptPassword(changeUserPassword.NewPassword);
+            _databaseContext.ApplicationUsers.Update(user);
+            await _databaseContext.SaveChangesAsync();
+
+            return new ResetPasswrdMessage { IsSuccess = true };
+        }
+
+        public async Task<IdentityUser> UpdateUserInfoAsync(UpdateUserInfo updateUserInfo)
+        {
+            var user = await _databaseContext.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == updateUserInfo.Id);
 
             if (user is null)
             {
                 throw new Exception("Invalid user Id.");
             }
-            var role = await _databaseContext.ApplicationUserRoles.FirstOrDefaultAsync(r => r.Id == newRoleId);
+
+            var role = await _databaseContext.ApplicationUserRoles.FirstOrDefaultAsync(r => r.Id == updateUserInfo.RoleId);
 
             if (role is null)
             {
                 throw new Exception("Invalid role Id.");
             }
 
+            user.Name = updateUserInfo.Name;
+            user.Surname = updateUserInfo.Surname;
+            user.PhoneNumber = updateUserInfo.PhoneNumber;
+            user.IsActive = updateUserInfo.IsActive;
+            user.Email = updateUserInfo.Email;
             user.ApplicationUserRoleId = role.Id;
             _databaseContext.ApplicationUsers.Update(user);
-            await _databaseContext.SaveChangesAsync();
 
             if (await _databaseContext.SaveChangesAsync() <= 0)
             {
@@ -90,6 +127,7 @@
                 Surname = user.Surname,
                 PhoneNumber = user.PhoneNumber,
                 Role = role.Name,
+                IsActive = user.IsActive,
             };
         }
 
@@ -119,6 +157,7 @@
                 Email = newUser.Email,
                 PhoneNumber = newUser.PhoneNumber,
                 ApplicationUserRoleId = role.Id,
+                IsActive = true,
             };
 
             _databaseContext.ApplicationUsers.Add(userShouldBeCreated);
@@ -136,6 +175,7 @@
                 Surname = userShouldBeCreated.Surname,
                 PhoneNumber = userShouldBeCreated.PhoneNumber,
                 Role = role.Name,
+                IsActive = userShouldBeCreated.IsActive,
             };
         }
 

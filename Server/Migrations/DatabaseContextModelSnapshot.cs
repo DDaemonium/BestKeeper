@@ -35,6 +35,9 @@ namespace Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -66,6 +69,7 @@ namespace Server.Migrations
                             Id = new Guid("53be8d81-2725-4c34-8d56-6ee936e76c31"),
                             ApplicationUserRoleId = new Guid("53be8d81-2725-4c34-8d56-6ee936e76c30"),
                             Email = "admin@admin.admin",
+                            IsActive = true,
                             Name = "Admin",
                             Password = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
                             PhoneNumber = "88005553535",

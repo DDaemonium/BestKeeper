@@ -1,0 +1,103 @@
+﻿@page "/users"
+@using Domain.Data.Identity
+@using Domain.Dto.Response.Identity
+@using WebApplication.Service.Identity
+@using WebApplication.Service.UserManagement
+
+@inject IdentityManager IdentityManager
+@inject UsersService UsersService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Управление персоналом</PageTitle>
+
+<h3>Управление персоналом</h3>
+
+@if (usersForView is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button @onclick="@ShowAllUsers" type="button" class="btn btn-primary">Все</button>
+        <button @onclick="@ShowActiveUsers" type="button" class="btn btn-primary">Активные</button>
+        <button @onclick="@ShowInactiveUsers" type="button" class="btn btn-primary">Неактивные</button>
+        <a href="users/create" class="btn btn-success">Добавить</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Профиль</th>
+                <th>Имя</th>
+                <th>Фамилия</th>
+                <th>Должность</th>
+                <th>Email</th>
+                <th>Телефон</th>
+                <th>Активность</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in usersForView)
+            {
+                <tr>
+                    <td><a href="@($"users/edit?id={user.Id}")">Открыть</a></td>
+                    <td>@user.Name</td>
+                    <td>@user.Surname</td>
+                    <td>@user.Role</td>
+                    <td>@user.Email</td>
+                    <td>@user.PhoneNumber</td>
+                    <td>@if(user.IsActive)
+                        {
+                            <button @onclick=@(() => ChangeUserActivity(user)) type="button" class="btn alert-danger">Деактивировать</button>
+                        }
+                        else
+                        {
+                            <button @onclick=@(() => ChangeUserActivity(user)) type="button" class="btn btn-success">Активировать</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<IdentityUser>? users;
+    private List<IdentityUser>? usersForView;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator))
+        {
+            return;
+        }
+
+        users = await UsersService.GetAllUsersAsync();
+        ShowAllUsers();
+    }
+
+    private async Task ChangeUserActivity(IdentityUser user)
+    {
+
+    }
+
+    private void CreateUser()
+    {
+        NavigationManager.NavigateTo("");
+    }
+
+    private void ShowAllUsers()
+    {
+        usersForView = users;
+    }
+
+    private void ShowActiveUsers()
+    {
+        usersForView = users?.Where(u => u.IsActive).ToList();
+    }
+
+    private void ShowInactiveUsers()
+    {
+        usersForView = users?.Where(u => !u.IsActive).ToList();
+    }
+}

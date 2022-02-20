@@ -3,8 +3,9 @@
     using System;
     using System.ComponentModel.DataAnnotations;
 
-    public class NewUser
+    public class UpdateUserInfo
     {
+        public Guid Id { get; set; }
         public Guid RoleId { get; set; }
 
         [Required]
@@ -21,12 +22,9 @@
         public string Email { get; set; }
 
         [Required]
-        [MaxLength(256)]
-        public string Password { get; set; }
-
-        [Required]
         [Phone]
         [MaxLength(256)]
         public string PhoneNumber { get; set; }
+        public bool IsActive { get; set; }
     }
 }

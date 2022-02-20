@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using WebApplication;
 using WebApplication.Service.Identity;
+using WebApplication.Service.UserManagement;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -13,6 +14,7 @@ builder.Services.AddScoped<IdentityManager>();
 builder.Services.AddScoped<IdentityHttpClient>();
 
 builder.Services.AddScoped<IdentityService>();
+builder.Services.AddScoped<UsersService>();
 
 builder.Services.AddBlazoredLocalStorage();
 

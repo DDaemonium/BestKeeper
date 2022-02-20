@@ -21,6 +21,18 @@
             return await _httpClient.GetFromJsonAsync<T>(requestUri);
         }
 
+        public async Task<string?> GetAsync(string? requestUri)
+        {
+            AddAuthorizationHeader();
+            var requestResult = await _httpClient.GetAsync(requestUri);
+            if (requestResult.IsSuccessStatusCode)
+            {
+                return (await requestResult.Content.ReadFromJsonAsync<ActionResult>())?.Result;
+            }
+
+            return default;
+        }
+
         public async Task<TResult?> PostAsync<TRequest, TResult>(string? requestUri, TRequest value)
         {
             AddAuthorizationHeader();

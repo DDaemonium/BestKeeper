@@ -1,4 +1,4 @@
-﻿namespace Server.Data.Identity
+﻿namespace Domain.Data.Identity
 {
     public class Role
     {

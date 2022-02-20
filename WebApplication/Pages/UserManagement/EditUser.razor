@@ -1,0 +1,209 @@
+﻿@page "/users/edit"
+@using Domain.Data.Identity
+@using Domain.Dto.Request.Identity
+@using Domain.Dto.Response.Identity
+@using System.Timers
+@using WebApplication.Service.Identity
+@using WebApplication.Service.UserManagement
+@using WebApplication.Util
+
+@inject IdentityManager IdentityManager
+@inject UsersService UsersService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Редактирование пользователя</PageTitle>
+
+<h3>Редактирование пользователя</h3>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success" role="alert">
+        @successMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+<a href="users" class="btn btn-primary">Назад</a>
+
+@if (currentUser is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <form style="max-width:800px;">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputName">Имя</label>
+                <input @bind-value="@currentUser.Name" class="form-control" id="inputName" placeholder="Иван">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputSurname">Фамилия</label>
+                <input @bind-value="@currentUser.Surname" class="form-control" id="inputSurname" placeholder="Иванов">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputEmail">Email</label>
+                <input @bind-value="@currentUser.Email" type="email" class="form-control" id="inputEmail" placeholder="example@example.com">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputPhone">Телефон</label>
+                <input @bind-value="@currentUser.PhoneNumber" class="form-control" id="inputPhone" placeholder="88005553535">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label for="inputRole">Должность</label>
+                <select style="min-width:150px;" @bind="@currentUser.Role" id="inputRole" class="form-control">
+                    <option>@RoleManager.GetRoleViewName(RoleConstants.Administrator)</option>
+                    <option>@RoleManager.GetRoleViewName(RoleConstants.Manager)</option>
+                    <option>@RoleManager.GetRoleViewName(RoleConstants.Waiter)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+                <input @bind="@currentUser.IsActive" class="form-check-input" type="checkbox" id="activeCheck">
+                <label class="form-check-label" for="activeCheck">
+                    Активен
+                </label>
+            </div>
+        </div>
+        <br />
+        <a @onclick="@UpdateUserData" class="btn btn-success">Сохранить</a>
+    </form>
+    <br />
+    <br />
+    <form style="max-width:400px;">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputOldPassword">Старый пароль</label>
+                <input @bind-value="@changeUserPassword.OldPassword" type="password" class="form-control" id="inputOldPassword">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputNewPassword">Новый пароль</label>
+                <input @bind-value="@changeUserPassword.NewPassword" type="password" class="form-control" id="inputNewPassword">
+            </div>
+        </div>
+        <br />
+        <a @onclick="@ResetPassword" class="btn btn-warning">Сменить пароль</a>
+    </form>
+}
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "id")]
+    public Guid? CurrentUserId { get; set; }
+
+    private System.Timers.Timer? successAlertTimer;
+    private System.Timers.Timer? errorAlertTimer;
+    private string? successMessage;
+    private string? errorMessage;
+    private IdentityUser? currentUser;
+    private ChangeUserPassword changeUserPassword = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator))
+        {
+            return;
+        }
+
+        if (successAlertTimer is null && errorAlertTimer is null)
+        {
+            successAlertTimer = new System.Timers.Timer(5000);
+            successAlertTimer.Elapsed += (object? sender, ElapsedEventArgs e) =>
+            {
+                successMessage = null;
+                successAlertTimer.Stop();
+            };
+
+            errorAlertTimer = new System.Timers.Timer(5000);
+            errorAlertTimer.Elapsed += (object? sender, ElapsedEventArgs e) =>
+            {
+                errorMessage = null;
+                errorAlertTimer.Stop();
+            };
+        }
+
+        if (CurrentUserId is not null)
+        {
+            currentUser = await UsersService.GetUserByIdAsync(CurrentUserId.Value);
+            if (currentUser is not null)
+            {
+                currentUser.Role = RoleManager.GetRoleViewName(currentUser.Role);
+                changeUserPassword.UserId = CurrentUserId.Value;
+            }
+        }
+    }
+
+    private async Task UpdateUserData()
+    {
+        if (currentUser is null)
+        {
+            return;
+        }
+
+        var user = await UsersService.UpdateUserInfoAsync(new()
+            {
+                Id = currentUser.Id,
+                Email = currentUser.Email,
+                PhoneNumber = currentUser.PhoneNumber,
+                Name = currentUser.Name,
+                Surname = currentUser.Surname,
+                RoleId = RoleManager.GetRoleId(currentUser.Role),
+                IsActive = currentUser.IsActive,
+            });
+
+        if (user is not null)
+        {
+            currentUser = user;
+            currentUser.Role = RoleManager.GetRoleViewName(currentUser.Role);
+            SetSuccessAlert("Данные успешно изменены.");
+        }
+        else
+        {
+            SetErrorAlert("Ошибка изменения данных.");
+        }
+    }
+
+    private async Task ResetPassword()
+    {
+        var result = await UsersService.ResetPasswordAsync(changeUserPassword);
+        if (result is not null && result.IsSuccess)
+        {
+            SetSuccessAlert("Пароль успешно изменён.");
+        }
+        else
+        {
+            SetErrorAlert("Не удалось изменить пароль.");
+        }
+    }
+
+    private void SetSuccessAlert(string message)
+    {
+        if (successAlertTimer is not null)
+        {
+            successAlertTimer.Stop();
+            successMessage = message;
+            successAlertTimer.Start();
+        }
+    }
+
+    private void SetErrorAlert(string message)
+    {
+        if (errorAlertTimer is not null)
+        {
+            errorAlertTimer.Stop();
+            errorMessage = message;
+            errorAlertTimer.Start();
+        }
+    }
+}

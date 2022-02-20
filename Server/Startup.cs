@@ -5,6 +5,7 @@
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.OpenApi.Models;
     using Server.DataAccess;
+    using Server.Service.Dishes;
     using Server.Service.Identity;
     using System.Text;
 
@@ -22,6 +23,7 @@
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("connectionString")));
             services.AddScoped<IdentityService>();
             services.AddScoped<JwtService>();
+            services.AddScoped<CategoryService>();
 
             // Add services to the container.
             services.AddControllers();

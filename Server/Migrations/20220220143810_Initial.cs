@@ -58,6 +58,7 @@ namespace Server.Migrations
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     ApplicationUserRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -160,8 +161,8 @@ namespace Server.Migrations
 
             migrationBuilder.InsertData(
                 table: "ApplicationUsers",
-                columns: new[] { "Id", "ApplicationUserRoleId", "Email", "Name", "Password", "PhoneNumber", "Surname" },
-                values: new object[] { new Guid("53be8d81-2725-4c34-8d56-6ee936e76c31"), new Guid("53be8d81-2725-4c34-8d56-6ee936e76c30"), "admin@admin.admin", "Admin", "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "88005553535", "Admin" });
+                columns: new[] { "Id", "ApplicationUserRoleId", "Email", "IsActive", "Name", "Password", "PhoneNumber", "Surname" },
+                values: new object[] { new Guid("53be8d81-2725-4c34-8d56-6ee936e76c31"), new Guid("53be8d81-2725-4c34-8d56-6ee936e76c30"), "admin@admin.admin", true, "Admin", "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "88005553535", "Admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ApplicationUsers_ApplicationUserRoleId",

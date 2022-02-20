@@ -12,7 +12,7 @@ using Server.DataAccess;
 namespace Server.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220219221552_Initial")]
+    [Migration("20220220143810_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,9 @@ namespace Server.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -68,6 +71,7 @@ namespace Server.Migrations
                             Id = new Guid("53be8d81-2725-4c34-8d56-6ee936e76c31"),
                             ApplicationUserRoleId = new Guid("53be8d81-2725-4c34-8d56-6ee936e76c30"),
                             Email = "admin@admin.admin",
+                            IsActive = true,
                             Name = "Admin",
                             Password = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
                             PhoneNumber = "88005553535",

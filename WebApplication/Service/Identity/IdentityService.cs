@@ -20,7 +20,18 @@
             _identityManager.Jwt = string.Empty;
         }
 
-        public async Task Login(LoginInfo loginInfo)
+        public async Task RefreshTokenAsync()
+        {
+            var jwtToken = await _identityHttpClient.GetAsync($"{_identityControllerEndpoint}/token/refresh");
+            if (string.IsNullOrEmpty(jwtToken))
+            {
+                return;
+            }
+
+            _identityManager.Jwt = jwtToken;
+        }
+
+        public async Task LoginAsync(LoginInfo loginInfo)
         {
             var jwtToken = await _identityHttpClient.PostAsync($"{_identityControllerEndpoint}/login", loginInfo);
             if (string.IsNullOrEmpty(jwtToken))
