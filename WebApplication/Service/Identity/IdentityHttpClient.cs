@@ -34,6 +34,19 @@
             return default;
         }
 
+        public async Task<string?> PostAsync<TRequest>(string? requestUri, TRequest value)
+        {
+            AddAuthorizationHeader();
+            var content = new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, "application/json");
+            var requestResult = await _httpClient.PostAsync(requestUri, content);
+            if(requestResult.IsSuccessStatusCode)
+            {
+                return (await requestResult.Content.ReadFromJsonAsync<ActionResult>())?.Result;
+            }
+
+            return default;
+        }
+
         public async Task<TResult?> PutAsync<TRequest, TResult>(string? requestUri, TRequest value)
         {
             AddAuthorizationHeader();
@@ -74,10 +87,21 @@
 
         private void AddAuthorizationHeader()
         {
-            if (_identityService.IsAuthorized)
+            if (!_identityService.IsAuthorized)
             {
-                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_identityService.Jwt}");
+                return;
             }
+
+            if(_httpClient.DefaultRequestHeaders.Contains("Authorization"))
+            {
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+            }
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_identityService.Jwt}");
+        }
+
+        private class ActionResult
+        {
+            public string? Result { get; set; }
         }
     }
 }

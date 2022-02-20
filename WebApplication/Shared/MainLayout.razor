@@ -1,4 +1,9 @@
-﻿@inherits LayoutComponentBase
+﻿@using WebApplication.Service.Identity
+@inherits LayoutComponentBase
+
+@inject IdentityManager IdentityManager
+@inject IdentityService IdentityService
+@inject NavigationManager NavigationManager
 
 <div class="page">
     <div class="sidebar">
@@ -7,7 +12,17 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            @if (IdentityManager.IsAuthorized)
+            {
+                <label>
+                   @IdentityManager.Identity.FullName 
+                   <a @onclick=@(() => { IdentityService.LogOut(); NavigationManager.NavigateTo("authentication/login");})>Logout</a>
+                </label>
+            }
+            else
+            {
+                <a href="authentication/login">Login</a>
+            }
         </div>
 
         <article class="content px-4">

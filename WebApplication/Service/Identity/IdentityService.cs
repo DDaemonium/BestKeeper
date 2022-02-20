@@ -7,6 +7,7 @@
         private readonly IdentityHttpClient _identityHttpClient;
         private readonly IdentityManager _identityManager;
         private readonly string _identityControllerEndpoint;
+
         public IdentityService(IdentityHttpClient identityHttpClient, IConfiguration configuration, IdentityManager identityManager)
         {
             _identityHttpClient = identityHttpClient;
@@ -14,9 +15,14 @@
             _identityControllerEndpoint = $"{configuration["ServerEndpoint"]}{configuration["IdentityController"]}";
         }
 
+        public void LogOut()
+        {
+            _identityManager.Jwt = string.Empty;
+        }
+
         public async Task Login(LoginInfo loginInfo)
         {
-            var jwtToken = await _identityHttpClient.PostAsync<LoginInfo, string>($"{_identityControllerEndpoint}/login", loginInfo);
+            var jwtToken = await _identityHttpClient.PostAsync($"{_identityControllerEndpoint}/login", loginInfo);
             if (string.IsNullOrEmpty(jwtToken))
             {
                 return;

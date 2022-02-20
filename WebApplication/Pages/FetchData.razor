@@ -1,5 +1,7 @@
 ﻿@page "/fetchdata"
-@inject HttpClient Http
+@using WebApplication.Service.Identity
+@inject IdentityHttpClient Http
+@inject IdentityManager IdentityManager
 
 <PageTitle>Weather forecast</PageTitle>
 
@@ -41,7 +43,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("https://localhost:7212/WeatherForecast");
+        IdentityManager.RequireAuthorization();
+        if(!IdentityManager.IsAuthorized)
+        {
+            return;
+        }
+
+        forecasts = await Http.GetAsync<WeatherForecast[]>("https://localhost:7212/WeatherForecast");
     }
 
     public class WeatherForecast

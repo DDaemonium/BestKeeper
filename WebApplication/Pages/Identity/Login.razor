@@ -1,0 +1,57 @@
+﻿@page "/authentication/login"
+@using Domain.Dto.Request.Identity
+@using WebApplication.Service.Identity
+
+@inject IdentityService IdentityService
+@inject IdentityManager IdentityManager
+@inject NavigationManager NavigationManager
+
+@if (isLoginFailed)
+{
+    <div class="alert alert-danger" role="alert">
+      Login failed! Please try again.
+    </div>
+}
+
+<div class="text-center">
+    <div class="form-signin">
+      <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+      <label for="inputEmail" class="sr-only">Email address</label>
+      <input @bind-value="@_loginInfo.Email" type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="">
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input @bind-value="@_loginInfo.Password" type="password" id="inputPassword" class="form-control" placeholder="Password" required="">
+      <button @onclick="@LoginAsync" class="btn btn-lg btn-primary btn-block">Sign in</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    private bool isLoginFailed = false;
+    private LoginInfo _loginInfo = new();
+
+    private async Task LoginAsync()
+    {
+        try
+        {
+            await IdentityService.Login(_loginInfo);
+        }
+        catch(Exception ex)
+        {
+            isLoginFailed = true;
+            return;
+        }
+
+        if (IdentityManager.IsAuthorized)
+        {
+
+            NavigationManager.NavigateTo(ReturnUrl ?? "/");
+        }
+        else
+        {
+            isLoginFailed = true;
+        }
+    }
+}
