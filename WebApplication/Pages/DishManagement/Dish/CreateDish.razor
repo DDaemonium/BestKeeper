@@ -1,19 +1,94 @@
 ﻿@page "/dishes/create"
 @using Domain.Data.Identity
+@using Domain.Dto.Request.Dish
+@using Domain.Dto.Response.Dish
+@using WebApplication.Service.DishManagement
 @using WebApplication.Service.Identity
 
 @inject IdentityManager IdentityManager
+@inject NavigationManager NavigationManager
+@inject CategoryService CategoryService
+@inject DishService DishService
 
 <PageTitle>Добавление блюда</PageTitle>
 
 <h3>Добавление блюда</h3>
 
+<a href="dishes" class="btn btn-primary">Назад</a>
+@if (categories is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <form style="max-width:800px;">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputName">Название</label>
+                <input @bind-value="@newDish.Name" class="form-control" id="inputName" placeholder="Борщ">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputDescription">Описание</label>
+                <textarea @bind="@newDish.Description" class="form-control" id="inputDescription" aria-label="Описание"></textarea>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputIngredients">Ингредиенты</label>
+                <textarea @bind="@newDish.Ingredients" class="form-control" id="inputIngredients" aria-label="Ингредиенты"></textarea>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputWeight">Вес (гр)</label>
+                <input type="number" @bind-value="@newDish.GramWeight" class="form-control" id="inputWeight">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputCost">Стоимость ₽</label>
+                <input type="number" @bind-value="@newDish.Cost" class="form-control" id="inputCost">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputCategory">Категория</label>
+                <select @onchange="OnCategoryChanged" id="inputCategory" style="max-width:300px;" class="form-select" aria-label="Категории">
+                    @foreach (var categiory in categories)
+                    {
+                        <option value="@(categiory.Id)">@categiory.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <br />
+        <a @onclick="@CreateDishAsync" class="btn btn-success">Добавить</a>
+    </form>
+}
+
 @code {
+    private NewDish newDish = new();
+    private List<CategoryInfo>? categories;
+
     protected override async Task OnInitializedAsync()
     {
         if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
         {
             return;
+        }
+
+        categories = await CategoryService.GetAllCategoriesAsync();
+        if (categories.Any())
+        {
+            newDish.DishCategoryId = categories.First().Id;
+        }
+        newDish.IsAvailabel = true;
+    }
+
+    private void OnCategoryChanged(ChangeEventArgs e)
+    {
+        Guid selectedCategoryId = Guid.Parse(e.Value.ToString());
+        newDish.DishCategoryId = selectedCategoryId;
+    }
+
+    public async Task CreateDishAsync()
+    {
+        var dish = await DishService.CreateDishAsync(newDish);
+        if (dish is not null)
+        {
+            NavigationManager.NavigateTo($"dishes/edit?id={dish.Id}");
         }
     }
 }

@@ -78,7 +78,7 @@ else
 
     private async Task ChangeUserActivity(IdentityUser user)
     {
-
+        user.IsActive = (await UsersService.ChaneUserActivityAsync(user.Id, !user.IsActive)) ?? false;
     }
 
     private void CreateUser()

@@ -1,12 +1,9 @@
-﻿namespace Domain.Dto.Request.Dish
+﻿namespace Domain.Dto.Request.Management
 {
     using System.ComponentModel.DataAnnotations;
 
-    public class UpdateCategory
+    public class NewTable
     {
-        [Required]
-        public Guid Id { get; set; }
-
         [Required]
         [MaxLength(256)]
         public string Name { get; set; }

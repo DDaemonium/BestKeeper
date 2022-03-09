@@ -17,6 +17,7 @@ builder.Services.AddScoped<IdentityHttpClient>();
 builder.Services.AddScoped<IdentityService>();
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<DishService>();
 
 builder.Services.AddBlazoredLocalStorage();
 

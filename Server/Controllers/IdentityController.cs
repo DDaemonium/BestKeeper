@@ -88,6 +88,18 @@
         public async Task<IActionResult> GetUserById(Guid id) => Ok(await _identityService.GetUserByIdAsync(id));
 
         [Authorize(Roles = RoleConstants.Administrator)]
+        [HttpPatch("users/{id}/activity")]
+        public async Task<IActionResult> ChangeUserActivity([FromRoute] Guid id, [FromBody] bool isActive)
+        {
+            if (id == CurrentUserId)
+            {
+                return BadRequest("Unable to deactivate current user.");
+            }
+
+            return Ok(await _identityService.ChangeUserActivityAsync(id, isActive));
+        }
+
+        [Authorize(Roles = RoleConstants.Administrator)]
         [HttpPatch("users/password/reset")]
         public async Task<IActionResult> ResetPassword(ChangeUserPassword changeUserPassword)
         {

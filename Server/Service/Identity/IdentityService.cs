@@ -90,6 +90,29 @@
             return new ResetPasswrdMessage { IsSuccess = true };
         }
 
+        public async Task<bool> ChangeUserActivityAsync(Guid id, bool isActive)
+        {
+            var user = await _databaseContext.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user is null)
+            {
+                throw new Exception("Invalid user Id.");
+            }
+
+            if(user.IsActive == isActive)
+            {
+                return user.IsActive;
+            }
+            else
+            {
+                user.IsActive = isActive;
+                _databaseContext.ApplicationUsers.Update(user);
+                await _databaseContext.SaveChangesAsync();
+            }
+            
+            return user.IsActive;
+        }
+
         public async Task<IdentityUser> UpdateUserInfoAsync(UpdateUserInfo updateUserInfo)
         {
             var user = await _databaseContext.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == updateUserInfo.Id);

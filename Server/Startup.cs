@@ -7,6 +7,7 @@
     using Server.DataAccess;
     using Server.Service.Dishes;
     using Server.Service.Identity;
+    using Server.Service.Management;
     using System.Text;
 
     public class Startup
@@ -24,6 +25,8 @@
             services.AddScoped<IdentityService>();
             services.AddScoped<JwtService>();
             services.AddScoped<CategoryService>();
+            services.AddScoped<DishService>();
+            services.AddScoped<TableService>();
 
             // Add services to the container.
             services.AddControllers();

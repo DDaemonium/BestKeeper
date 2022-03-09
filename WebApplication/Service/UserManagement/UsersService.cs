@@ -25,6 +25,9 @@
         public async Task<IdentityUser?> GetUserByIdAsync(Guid id)
         => await _identityHttpClient.GetAsync<IdentityUser>($"{_identityControllerEndpoint}/users/{id}");
 
+        public async Task<bool?> ChaneUserActivityAsync(Guid id, bool isActive)
+        => await _identityHttpClient.PatchAsync<bool, bool>($"{_identityControllerEndpoint}/users/{id}/activity", isActive);
+
         public async Task<ResetPasswrdMessage?> ResetPasswordAsync(ChangeUserPassword changeUserPassword)
         => await _identityHttpClient.PatchAsync<ChangeUserPassword, ResetPasswrdMessage>($"{_identityControllerEndpoint}/users/password/reset", changeUserPassword);
         

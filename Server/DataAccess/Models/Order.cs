@@ -4,7 +4,7 @@
     {
         public Guid Id { get; set; }
         public DateTime Opened { get; set; }
-        public DateTime Closed { get; set; }
+        public DateTime? Closed { get; set; }
         public string CloseDescription { get; set; }
         public Guid ApplicationUserId { get; set; }
         public ApplicationUser ApplicationUser { get; set; }

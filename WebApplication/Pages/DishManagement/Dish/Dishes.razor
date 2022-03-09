@@ -1,19 +1,111 @@
 ﻿@page "/dishes"
 @using Domain.Data.Identity
+@using Domain.Dto.Response.Dish
+@using WebApplication.Service.DishManagement
 @using WebApplication.Service.Identity
 
 @inject IdentityManager IdentityManager
+@inject CategoryService CategoryService
+@inject DishService DishService
 
 <PageTitle>Блюда</PageTitle>
 
 <h3>Блюда</h3>
 
+@if (dishesForView is null || categories is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+
+    <p>
+        <div class="row">
+            <div class="col-2">
+                <a href="dishes/create" class="btn btn-success">Добавить</a>
+            </div>
+            <div class="col-10">
+                <select @onchange="ShowDishesByCategory" style="max-width:300px;" class="form-select" aria-label="Категории">
+                    <option value="-1" selected>Все категории</option>
+                    @foreach (var categiory in categories)
+                    {
+                        <option value="@(categiory.Id)">@categiory.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+    </p>
+    <table class="table" style="max-width:600px;">
+        <thead>
+            <tr>
+                <th>Редактировать</th>
+                <th>Название</th>
+                <th style="min-width:100px;">Вес (гр)</th>
+                <th style="min-width:130px;">Стоимость ₽</th>
+                <th>Категория</th>
+                <th>Наличие</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var dish in dishesForView)
+            {
+                <tr>
+                    <td><a href="@($"dishes/edit?id={dish.Id}")">Открыть</a></td>
+                    <td>@dish.Name</td>
+                    <td>@dish.GramWeight</td>
+                    <td>@dish.Cost</td>
+                    <td>@dish.DishCategoryName</td>
+                    @if (dish.IsAvailabel)
+                    {
+                        <td style="color:darkseagreen;">В наличии</td>
+                    }
+                    else
+                    {
+                        <td style="color:darkred;">Отсутствует</td>
+                    }
+                    <td><button @onclick=@(() => DeleteDish(dish)) type="button" class="btn alert-danger">Удалить</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 @code {
+    private List<CategoryInfo>? categories;
+    private List<DishInfo>? dishes;
+    private List<DishInfo>? dishesForView;
+
     protected override async Task OnInitializedAsync()
     {
         if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
         {
             return;
         }
+
+        categories = await CategoryService.GetAllCategoriesAsync();
+        dishes = await DishService.GetAllDishesAsync();
+        dishesForView = dishes;
+    }
+
+    private void ShowDishesByCategory(ChangeEventArgs e)
+    {
+        string selectedCategoryId = e.Value.ToString();
+        if (selectedCategoryId.Equals("-1"))
+        {
+            dishesForView = dishes;
+        }
+        else
+        {
+            Guid id = Guid.Parse(selectedCategoryId);
+            dishesForView = dishes.Where(d => d.DishCategoryId == id).ToList();
+        }
+    }
+
+    private async Task DeleteDish(DishInfo dishInfo)
+    {
+        await DishService.DeleteDishAsync(dishInfo.Id);
+        dishes?.Remove(dishInfo);
     }
 }
