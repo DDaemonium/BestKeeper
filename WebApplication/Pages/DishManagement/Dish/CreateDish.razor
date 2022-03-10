@@ -83,7 +83,7 @@ else
         newDish.DishCategoryId = selectedCategoryId;
     }
 
-    public async Task CreateDishAsync()
+    private async Task CreateDishAsync()
     {
         var dish = await DishService.CreateDishAsync(newDish);
         if (dish is not null)

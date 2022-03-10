@@ -1,23 +1,161 @@
 ﻿@page "/tables/edit"
 @using Domain.Data.Identity
+@using Domain.Dto.Request.Management
+@using Domain.Dto.Response.Management
+@using System.Timers
 @using WebApplication.Service.Identity
+@using WebApplication.Service.Management
 
 @inject IdentityManager IdentityManager
+@inject TableService TableService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Редактирование стола</PageTitle>
 
 <h3>Редактирование стола</h3>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success" role="alert">
+        @successMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+<a href="tables" class="btn btn-primary">Назад</a>
+
+@if (tableInfo is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <form style="max-width:800px;">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputName">Название</label>
+                <input @bind-value="@tableInfo.Name" class="form-control" id="inputName" placeholder="Борщ">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputDescription">Описание</label>
+                <textarea @bind="@tableInfo.Description" class="form-control" id="inputDescription" aria-label="Описание"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+                <input @bind="@tableInfo.IsReserved" class="form-check-input" type="checkbox" id="availabelCheck">
+                <label class="form-check-label" for="availabelCheck">
+                    Забронирован
+                </label>
+            </div>
+        </div>
+        <br />
+        <a @onclick="@UpdateTable" class="btn btn-success">Сохранить</a>
+        <a @onclick="@DeleteTable" class="btn btn-danger">Удалить</a>
+    </form>
+}
 
 @code {
     [Parameter]
     [SupplyParameterFromQuery(Name = "id")]
     public Guid? CurrentTableId { get; set; }
 
+    private TableInfo? tableInfo;
+    private string? successMessage;
+    private string? errorMessage;
+    private System.Timers.Timer? successAlertTimer;
+    private System.Timers.Timer? errorAlertTimer;
+
     protected override async Task OnInitializedAsync()
     {
         if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
         {
             return;
+        }
+
+        if (successAlertTimer is null && errorAlertTimer is null)
+        {
+            successAlertTimer = new System.Timers.Timer(5000);
+            successAlertTimer.Elapsed += (object? sender, ElapsedEventArgs e) =>
+            {
+                successMessage = null;
+                successAlertTimer.Stop();
+            };
+
+            errorAlertTimer = new System.Timers.Timer(5000);
+            errorAlertTimer.Elapsed += (object? sender, ElapsedEventArgs e) =>
+            {
+                errorMessage = null;
+                errorAlertTimer.Stop();
+            };
+        }
+
+        if(CurrentTableId is not null)
+        {
+            tableInfo = await TableService.GetTableByIdAsync(CurrentTableId.Value);
+        }
+    }
+
+    private async Task UpdateTable()
+    {
+        if(tableInfo is null)
+        {
+            return;
+        }
+
+        var table = await TableService.UpdateTableAsync(new UpdateTable
+        {
+            Id = tableInfo.Id,
+            Name = tableInfo.Name,
+            Description = tableInfo.Description,
+            IsReserved = tableInfo.IsReserved,
+        });
+
+        if(table is not null)
+        {
+            SetSuccessAlert("Стол успешно изменён.");
+            tableInfo = table;
+        }
+        else
+        {
+            SetErrorAlert("Произошла ошибка при изменении стола.");
+        }
+    }
+
+    private async Task DeleteTable()
+    {
+        if(CurrentTableId is null)
+        {
+            return;
+        }
+
+        await TableService.DeleteTableAsync(CurrentTableId.Value);
+        NavigationManager.NavigateTo("tables");
+    }
+
+    private void SetSuccessAlert(string message)
+    {
+        if (successAlertTimer is not null)
+        {
+            successAlertTimer.Stop();
+            successMessage = message;
+            successAlertTimer.Start();
+        }
+    }
+
+    private void SetErrorAlert(string message)
+    {
+        if (errorAlertTimer is not null)
+        {
+            errorAlertTimer.Stop();
+            errorMessage = message;
+            errorAlertTimer.Start();
         }
     }
 }

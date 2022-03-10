@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using WebApplication;
 using WebApplication.Service.DishManagement;
 using WebApplication.Service.Identity;
+using WebApplication.Service.Management;
 using WebApplication.Service.UserManagement;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -18,6 +19,7 @@ builder.Services.AddScoped<IdentityService>();
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<DishService>();
+builder.Services.AddScoped<TableService>();
 
 builder.Services.AddBlazoredLocalStorage();
 

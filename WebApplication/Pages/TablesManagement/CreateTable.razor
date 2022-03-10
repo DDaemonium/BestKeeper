@@ -1,19 +1,51 @@
 ﻿@page "/tables/create"
 @using Domain.Data.Identity
+@using Domain.Dto.Request.Management
 @using WebApplication.Service.Identity
+@using WebApplication.Service.Management
 
 @inject IdentityManager IdentityManager
+@inject TableService TableService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Добавление стола</PageTitle>
 
 <h3>Добавление стола</h3>
 
+<a href="tables" class="btn btn-primary">Назад</a>
+
+<form style="max-width:800px;">
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="inputName">Название</label>
+            <input @bind-value="@newTable.Name" class="form-control" id="inputName" placeholder="Стол у онка #7">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="inputDescription">Описание</label>
+            <textarea @bind="@newTable.Description" class="form-control" id="inputDescription" aria-label="Описание"></textarea>
+        </div>
+    </div>
+    <br />
+    <a @onclick="@CreateTableAsync" class="btn btn-success">Добавить</a>
+</form>
+
 @code {
+    private NewTable newTable = new();
+
     protected override async Task OnInitializedAsync()
     {
         if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
         {
             return;
+        }
+    }
+
+    private async Task CreateTableAsync()
+    {
+        var table = await TableService.CreateTableAsync(newTable);
+        if (table is not null)
+        {
+            NavigationManager.NavigateTo($"tables/edit?id={table.Id}");
         }
     }
 }

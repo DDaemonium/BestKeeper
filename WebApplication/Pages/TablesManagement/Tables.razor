@@ -1,19 +1,77 @@
 ﻿@page "/tables"
 @using Domain.Data.Identity
+@using Domain.Dto.Response.Management
 @using WebApplication.Service.Identity
+@using WebApplication.Service.Management
 
 @inject IdentityManager IdentityManager
+@inject TableService TableService
 
 <PageTitle>Столы</PageTitle>
 
 <h3>Столы</h3>
 
+@if (tables is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <a href="tables/create" class="btn btn-success">Добавить</a>
+    </p>
+    <table class="table" style="max-width:600px;">
+        <thead>
+            <tr>
+                <th>Редактировать</th>
+                <th>Название</th>
+                <th>Бронирование</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var table in tables)
+            {
+                <tr>
+                    <td><a href="@($"tables/edit?id={table.Id}")">Открыть</a></td>
+                    <td>@table.Name</td>
+                    <td>@if(table.IsReserved)
+                        {
+                            <button @onclick=@(() => ChangeTableReservation(table)) type="button" class="btn alert-danger">Забронировать</button>
+                        }
+                        else
+                        {
+                            <button @onclick=@(() => ChangeTableReservation(table)) type="button" class="btn btn-success">Отменить бронь</button>
+                        }
+                    </td>
+                    <td><button @onclick=@(() => DeleteTable(table)) type="button" class="btn alert-danger">Удалить</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 @code {
+    private List<TableInfo>? tables;
+
     protected override async Task OnInitializedAsync()
     {
         if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
         {
             return;
         }
+
+        tables = await TableService.GetAllTablesAsync();
+    }
+
+    private async Task ChangeTableReservation(TableInfo table)
+    {
+        table.IsReserved = (await TableService.ChangeTableReservation(table.Id, !table.IsReserved)) ?? table.IsReserved;
+    }
+
+    private async Task DeleteTable(TableInfo table)
+    {
+        await TableService.DeleteTableAsync(table.Id);
+        tables?.Remove(table);
     }
 }

@@ -15,19 +15,19 @@
 <a href="categories" class="btn btn-primary">Назад</a>
 
 <form style="max-width:800px;">
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="inputName">Название</label>
-                <input @bind-value="@newCategory.Name" class="form-control" id="inputName" placeholder="Горячие блюда">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="inputDescription">Описание</label>
-                <textarea @bind="@newCategory.Description" class="form-control" id="inputDescription" aria-label="Описание"></textarea>
-            </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="inputName">Название</label>
+            <input @bind-value="@newCategory.Name" class="form-control" id="inputName" placeholder="Горячие блюда">
         </div>
-        <br />
-        <a @onclick="@CreateCategpry" class="btn btn-success">Добавить</a>
-    </form>
+        <div class="form-group col-md-6">
+            <label for="inputDescription">Описание</label>
+            <textarea @bind="@newCategory.Description" class="form-control" id="inputDescription" aria-label="Описание"></textarea>
+        </div>
+    </div>
+    <br />
+    <a @onclick="@CreateCategpry" class="btn btn-success">Добавить</a>
+</form>
 
 @code {
     private NewCategory newCategory = new();
@@ -40,7 +40,7 @@
         }
     }
 
-    public async Task CreateCategpry()
+    private async Task CreateCategpry()
     {
         var category = await CategoryService.CreateCategoryAsync(newCategory);
         if (category is not null)
