@@ -1,9 +1,10 @@
-﻿namespace WebApplication.Service.Identity
+﻿namespace SharedApplicationsData.Service.Identity
 {
     using Blazored.LocalStorage;
-    using WebApplication.Data.Identity;
+    using SharedApplicationsData.Data.Identity;
     using System.IdentityModel.Tokens.Jwt;
     using Microsoft.AspNetCore.Components;
+    using Microsoft.Extensions.Configuration;
 
     public class IdentityManager
     {
@@ -33,7 +34,7 @@
         /// <returns>true if user is authorized otherwise false.</returns>
         public bool CheckAuthorizationWithRedirect(params string[] roles)
         {
-            if(!IsAuthorized || !IsUserInRole(roles))
+            if (!IsAuthorized || !IsUserInRole(roles))
             {
                 _navigationManager.NavigateTo($"{_loginRedirectPath}?returnUrl={Uri.EscapeDataString(_navigationManager.Uri)}");
                 return false;

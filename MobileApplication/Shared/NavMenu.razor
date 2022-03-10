@@ -1,0 +1,67 @@
+﻿@using Domain.Data.Identity
+@using SharedApplicationsData.Service.Identity
+@implements IDisposable
+
+@inject IdentityManager IdentityManager
+@inject NavigationManager NavigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">BestKeeper</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        @if(IdentityManager.IsUserInRole(RoleConstants.Administrator, RoleConstants.Waiter))
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="orders" Match="NavLinkMatch.Prefix">
+                    <span class="oi oi-home" aria-hidden="true"></span> Текущие заказы
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="tables" Match="NavLinkMatch.Prefix">
+                    <span class="oi oi-align-right" aria-hidden="true"></span> Новый заказ
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="menu" Match="NavLinkMatch.Prefix">
+                    <span class="oi oi-align-left" aria-hidden="true"></span> Меню
+                </NavLink>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    protected override void OnInitialized()
+    {
+        // Subscribe to the event
+        NavigationManager.LocationChanged += LocationChanged;
+        base.OnInitialized();
+    }
+
+    void LocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from the event when our component is disposed
+        NavigationManager.LocationChanged -= LocationChanged;
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

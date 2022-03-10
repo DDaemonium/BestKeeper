@@ -2,7 +2,7 @@
 {
     using Domain.Dto.Request.Identity;
     using Domain.Dto.Response.Identity;
-    using WebApplication.Service.Identity;
+    using SharedApplicationsData.Service.Identity;
 
     public class UsersService
     {

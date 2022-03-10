@@ -1,4 +1,4 @@
-﻿namespace WebApplication.Data.Identity
+﻿namespace SharedApplicationsData.Data.Identity
 {
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;

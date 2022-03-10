@@ -2,7 +2,7 @@
 {
     using Domain.Dto.Request.Dish;
     using Domain.Dto.Response.Dish;
-    using WebApplication.Service.Identity;
+    using SharedApplicationsData.Service.Identity;
 
     public class CategoryService
     {

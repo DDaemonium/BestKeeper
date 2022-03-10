@@ -1,4 +1,4 @@
-﻿namespace WebApplication.Service.Identity
+﻿namespace SharedApplicationsData.Service.Identity
 {
     using System.Net.Http.Json;
     using System.Text;

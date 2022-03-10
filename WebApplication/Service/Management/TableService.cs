@@ -2,7 +2,7 @@
 {
     using Domain.Dto.Request.Management;
     using Domain.Dto.Response.Management;
-    using WebApplication.Service.Identity;
+    using SharedApplicationsData.Service.Identity;
 
     public class TableService
     {

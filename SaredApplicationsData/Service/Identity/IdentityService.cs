@@ -1,6 +1,7 @@
-﻿namespace WebApplication.Service.Identity
+﻿namespace SharedApplicationsData.Service.Identity
 {
     using Domain.Dto.Request.Identity;
+    using Microsoft.Extensions.Configuration;
 
     public class IdentityService
     {

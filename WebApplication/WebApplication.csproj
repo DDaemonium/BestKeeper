@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\SaredApplicationsData\SharedApplicationsData.csproj" />
   </ItemGroup>
 
   <ItemGroup>
