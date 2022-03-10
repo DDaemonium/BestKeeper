@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MobileApplication;
+using MobileApplication.Service;
 using SharedApplicationsData.Service.Identity;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -13,6 +14,8 @@ builder.Services.AddScoped<IdentityManager>();
 builder.Services.AddScoped<IdentityHttpClient>();
 
 builder.Services.AddScoped<IdentityService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<DishService>();
 
 builder.Services.AddBlazoredLocalStorage();
 

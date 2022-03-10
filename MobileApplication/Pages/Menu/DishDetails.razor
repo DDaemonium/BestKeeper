@@ -1,7 +1,60 @@
 ﻿@page "/menu/dish"
+@using Domain.Data.Identity
+@using Domain.Dto.Response.Dish
+@using MobileApplication.Service
+@using SharedApplicationsData.Service.Identity
 
-<h3>DishDetails</h3>
+@inject IdentityManager IdentityManager
+@inject DishService DishService
+
+<PageTitle>Детали блюда</PageTitle>
+
+<h3>Детали блюда</h3>
+
+<a href="menu" style="margin-bottom: 35px;" class="btn btn-primary">Назад</a>
+@if (dishInfo is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (dishInfo.IsAvailabel)
+    {
+        <div class="alert alert-success" style="max-width: 150px;" role="alert">
+          В наличии
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger" style="max-width: 150px;" role="alert">
+          Отсутствует
+        </div>        
+    }
+    <p><b>Название:</b> @dishInfo.Name</p>
+    <p><b>Категория:</b> @dishInfo.DishCategoryName</p>
+    <p><b>Стоимость:</b> @dishInfo.Cost ₽</p>
+    <p><b>Вес:</b> @dishInfo.GramWeight грамм</p>
+    <p style="white-space: pre;"><b>Описание:</b> @dishInfo.Description</p>
+    <p style="white-space: pre;"><b>Состав:</b> @dishInfo.Ingredients</p>
+}
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "id")]
+    public Guid? CurrentDishId { get; set; }
 
+    private DishInfo? dishInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Waiter))
+        {
+            return;
+        }
+
+        if(CurrentDishId is not null)
+        {
+            dishInfo = await DishService.GetDishByIdAsync(CurrentDishId.Value);
+        }
+    }
 }

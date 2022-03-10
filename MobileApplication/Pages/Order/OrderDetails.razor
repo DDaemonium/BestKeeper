@@ -1,5 +1,19 @@
-﻿<h3>OrderDetails</h3>
+﻿@page "/order"
+@using Domain.Data.Identity
+@using SharedApplicationsData.Service.Identity
+
+@inject IdentityManager IdentityManager
+
+<PageTitle>Детали заказа</PageTitle>
+
+<h3>Детали заказа</h3>
 
 @code {
-
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Waiter))
+        {
+            return;
+        }
+    }
 }

@@ -1,7 +1,105 @@
 ﻿@page "/menu"
+@using Domain.Data.Identity
+@using Domain.Dto.Response.Dish
+@using MobileApplication.Service
+@using SharedApplicationsData.Service.Identity
 
-<h3>Menu</h3>
+@inject IdentityManager IdentityManager
+@inject CategoryService CategoryService
+@inject DishService DishService
+
+<PageTitle>Меню</PageTitle>
+
+<h3>Меню</h3>
+
+@if (dishesForView is null || categories is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <select @onchange="ShowDishesByCategory" style="max-width:300px;" class="form-select" aria-label="Категории">
+            <option value="-1" selected>Все категории</option>
+            @foreach (var categiory in categories)
+            {
+                <option value="@(categiory.Id)">@categiory.Name</option>
+            }
+        </select>
+    </p>
+    @foreach (var dishForView in dishesForView)
+    {
+        <div class="table-responsive">
+            <h2>@categories.First(c => c.Id == dishForView.Key).Name</h2>
+            <table class="table" style="max-width:600px;">
+                <thead>
+                    <tr>
+                        <th>Подробнее</th>
+                        <th>Название</th>
+                        <th style="min-width:100px;">Вес (гр)</th>
+                        <th style="min-width:130px;">Стоимость ₽</th>
+                        <th>Категория</th>
+                        <th style="min-width:150px;">Наличие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dish in dishForView.Value)
+                    {
+                        <tr>
+                            <td><a href="@($"/menu/dish?id={dish.Id}")">Открыть</a></td>
+                            <td>@dish.Name</td>
+                            <td>@dish.GramWeight</td>
+                            <td>@dish.Cost</td>
+                            <td>@dish.DishCategoryName</td>
+                            @if (dish.IsAvailabel)
+                            {
+                                <td style="color:darkseagreen;">В наличии</td>
+                            }
+                            else
+                            {
+                                <td style="color:darkred;">Отсутствует</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+}
 
 @code {
+    private List<CategoryInfo>? categories;
+    private List<DishInfo>? dishes;
+    // key - dish category id, value - dishes info
+    private Dictionary<Guid, List<DishInfo>>? dishesForView;
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Waiter))
+        {
+            return;
+        }
+
+        categories = await CategoryService.GetAllCategoriesAsync();
+        dishes = await DishService.GetAllDishesAsync();
+        dishesForView = dishes?.GroupBy(d => d.DishCategoryId).ToDictionary(k => k.Key, v => v.ToList());
+    }
+
+    private void ShowDishesByCategory(ChangeEventArgs e)
+    {
+        string selectedCategoryId = e.Value.ToString();
+        if (selectedCategoryId.Equals("-1"))
+        {
+            dishesForView = dishes?.GroupBy(d => d.DishCategoryId).ToDictionary(k => k.Key, v => v.ToList());
+        }
+        else
+        {
+            Guid id = Guid.Parse(selectedCategoryId);
+            dishesForView = new Dictionary<Guid, List<DishInfo>>()
+            {
+                { id, dishes.Where(d => d.DishCategoryId == id).ToList() },
+            };
+        }
+    }
 }

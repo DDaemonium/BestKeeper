@@ -6,7 +6,6 @@
     using Microsoft.AspNetCore.Mvc;
     using Server.Service.Dishes;
 
-    [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager}")]
     [Route("api/categories")]
     [ApiController]
     public class CategoriesController : ControllerBase
@@ -18,12 +17,15 @@
             _categoryService = categoryService;
         }
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager},{RoleConstants.Waiter}")]
         [HttpGet]
         public async Task<IActionResult> GetAll() => Ok(await _categoryService.GetAll());
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager},{RoleConstants.Waiter}")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id) => Ok(await _categoryService.GetCategoryAsync(id));
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager}")]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -31,6 +33,7 @@
             return Ok();
         }
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager}")]
         [HttpPost("create")]
         public async Task<IActionResult> Create(NewCategory newCategory)
         {
@@ -43,6 +46,7 @@
             return Ok(await _categoryService.AddCategoryAsync(newCategory));
         }
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager}")]
         [HttpPut("update")]
         public async Task<IActionResult> Update(UpdateCategory updateCategory)
         {

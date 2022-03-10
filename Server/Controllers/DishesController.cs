@@ -6,7 +6,6 @@
     using Microsoft.AspNetCore.Mvc;
     using Server.Service.Dishes;
 
-    [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager}")]
     [Route("api/dishes")]
     [ApiController]
     public class DishesController : ControllerBase
@@ -18,12 +17,15 @@
             _dishService = dishService;
         }
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager},{RoleConstants.Waiter}")]
         [HttpGet]
         public async Task<IActionResult> GetAll() => Ok(await _dishService.GetDishesAsync());
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager},{RoleConstants.Waiter}")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id) => Ok(await _dishService.GetDishAsync(id));
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager}")]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -31,6 +33,7 @@
             return Ok();
         }
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager}")]
         [HttpPost("create")]
         public async Task<IActionResult> Create(NewDish newDIsh)
         {
@@ -43,6 +46,7 @@
             return Ok(await _dishService.AddDishAsync(newDIsh));
         }
 
+        [Authorize(Roles = $"{RoleConstants.Administrator},{RoleConstants.Manager}")]
         [HttpPut("update")]
         public async Task<IActionResult> Update(UpdateDish updateDish)
         {

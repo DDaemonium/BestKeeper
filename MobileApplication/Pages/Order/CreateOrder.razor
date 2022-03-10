@@ -1,7 +1,19 @@
 ﻿@page "/neworder"
+@using Domain.Data.Identity
+@using SharedApplicationsData.Service.Identity
 
-<h3>CreateOrder</h3>
+@inject IdentityManager IdentityManager
+
+<PageTitle>Новый заказ</PageTitle>
+
+<h3>Новый заказ</h3>
 
 @code {
-
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Waiter))
+        {
+            return;
+        }
+    }
 }
