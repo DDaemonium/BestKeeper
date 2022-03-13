@@ -51,6 +51,17 @@
                 IsReserved = t.IsReserved,
             }).ToListAsync();
 
+        public async Task<List<TableInfo>> GetAvailableTablesAsync()
+        => await _databaseContext.Tables.AsNoTracking()
+            .Where(t => !t.IsReserved)
+            .Select(t => new TableInfo
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Description = t.Description,
+                IsReserved = t.IsReserved,
+            }).ToListAsync();
+
         public async Task<TableInfo> UpdateTableAsync(UpdateTable updateTable)
         {
             var table = await _databaseContext.Tables.FirstOrDefaultAsync(t => t.Id == updateTable.Id);

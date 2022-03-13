@@ -1,19 +1,78 @@
 ﻿@page "/order"
 @using Domain.Data.Identity
+@using Domain.Dto.Response.Order
+@using MobileApplication.Service
 @using SharedApplicationsData.Service.Identity
 
 @inject IdentityManager IdentityManager
+@inject OrderService OrderService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Детали заказа</PageTitle>
 
 <h3>Детали заказа</h3>
 
+@if (orderInfo is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button @onclick=@(() => CloseOrder("Заказ выполнен")) class="btn btn-success">Закрыть</button>
+        <button @onclick=@(() => CloseOrder("Заказ отменён")) class="btn btn-danger">Отменить</button>
+    </p>
+    <p><b>Стол</b>: @orderInfo.TableName</p>
+    <p><b>Открыт</b>: @orderInfo.Opened</p>
+    <p><b>ИТОГО</b>: @orderInfo.Dishes.Sum(d => d.Cost * d.Count).ToString("#.##") ₽</p>
+    <h2>Блюда</h2>
+    <table class="table" style="max-width:600px;">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Количество</th>
+                <th>Цена ₽</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var dish in orderInfo.Dishes)
+            {
+                <tr>
+                    <td>@dish.Name</td>
+                    <td>@dish.Count</td>
+                    <td>@dish.Cost</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "id")]
+    public Guid? orderId { get; set; }
+
+    private OrderInfo? orderInfo;
+
     protected override async Task OnInitializedAsync()
     {
         if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Waiter))
         {
             return;
+        }
+
+        if(orderId is not null)
+        {
+            orderInfo = await OrderService.GetOrderByIdAsync(orderId.Value);
+        }
+    }
+
+    private async Task CloseOrder(string reason)
+    {
+        if(orderId is not null)
+        {
+            await OrderService.CloseOrderAsync(orderId.Value, reason);
+            NavigationManager.NavigateTo($"orders");
         }
     }
 }

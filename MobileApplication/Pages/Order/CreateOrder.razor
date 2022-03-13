@@ -1,19 +1,152 @@
 ﻿@page "/neworder"
 @using Domain.Data.Identity
+@using Domain.Dto.Request.Order
+@using Domain.Dto.Response.Dish
+@using MobileApplication.Service
 @using SharedApplicationsData.Service.Identity
 
 @inject IdentityManager IdentityManager
+@inject NavigationManager NavigationManager
+@inject CategoryService CategoryService
+@inject DishService DishService
+@inject OrderService OrderService
 
 <PageTitle>Новый заказ</PageTitle>
 
 <h3>Новый заказ</h3>
 
+<section class="h-100" style="background-color: #eee;">
+    <div class="container h-100 py-5">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-10">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-normal mb-0 text-black">Блюда в заказе</h3>
+                </div>
+                @foreach (var dishOrder in newOrder.DishOrders)
+                {
+                    var currentDish = dishes?.First(d => d.Id == dishOrder.DishId);
+
+                    <div class="card rounded-3 mb-4">
+                        <div class="card-body p-4">
+                            <div class="row d-flex justify-content-between align-items-center">
+                                <div class="col-md-2 col-lg-2 col-xl-2">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
+                                     class="img-fluid rounded-3" alt="@currentDish?.Name">
+                                </div>
+                                <div class="col-md-3 col-lg-3 col-xl-3">
+                                    <p class="lead fw-normal mb-2">@currentDish?.Name</p>
+                                </div>
+                                <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+                                    <input id="form1" min="1" name="quantity" @bind-value=dishOrder.Count type="number"
+                                       class="form-control form-control-sm" />
+                                </div>
+                                <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                                    <h5 class="mb-0">@((currentDish?.Cost * dishOrder.Count)?.ToString("#.##")) ₽</h5>
+                                </div>
+                                <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                    <button @onclick=@(() => RemoveFromCart(dishOrder)) class="btn btn-danger">Убрать</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (newOrder.DishOrders.Any())
+                {
+                    <div class="card">
+                        <div class="card-body">
+                            <button @onclick="CreateOrderAsync" type="button" class="btn btn-warning btn-block btn-lg">
+                                Оформить заказ на сумму @TotalCost?.ToString("#.##") ₽
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<h4>Меню</h4>
+
+@if (dishesForView is null || categories is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @foreach (var dishForView in dishesForView)
+    {
+        <div class="row">
+            <h2>@categories.First(c => c.Id == dishForView.Key).Name</h2>
+            @foreach (var dish in dishForView.Value)
+            {
+                <div class="col-sm-4" style="margin-bottom:10px;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@dish.Name</h5>
+                            <p class="card-text">@dish.Cost ₽</p>
+                            <button @onclick="@(() => AddToCart(dish))" class="btn btn-success">Добавить</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "tableId")]
+    public Guid? tableId { get; set; }
+
+    private readonly NewOrder newOrder = new();
+    private List<CategoryInfo>? categories;
+    private List<DishInfo>? dishes;
+    // key - dish category id, value - dishes info
+    private Dictionary<Guid, List<DishInfo>>? dishesForView;
+
     protected override async Task OnInitializedAsync()
     {
         if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Waiter))
         {
             return;
         }
+
+        if (tableId is not null)
+        {
+            newOrder.TableId = tableId.Value;
+            categories = await CategoryService.GetAllCategoriesAsync();
+            dishes = await DishService.GetAllDishesAsync();
+            UpdateDishesForView();
+        }
+    }
+
+    private decimal? TotalCost => newOrder.DishOrders.Sum(o => o.Count * dishes?.First(d => d.Id == o.DishId).Cost);
+
+    private async Task CreateOrderAsync()
+    {
+        var order = await OrderService.CreateOrderAsync(newOrder);
+        if (order is not null)
+        {
+            NavigationManager.NavigateTo($"orders");
+        }
+    }
+
+    private void UpdateDishesForView()
+    {
+        dishesForView = dishes?.Where(d => !newOrder.DishOrders.Any(o => o.DishId == d.Id))
+        .GroupBy(d => d.DishCategoryId).ToDictionary(k => k.Key, v => v.ToList());
+    }
+
+    private void AddToCart(DishInfo dish)
+    {
+        newOrder.DishOrders.Add(new NewDishOrder { Count = 1, DishId = dish.Id });
+        UpdateDishesForView();
+    }
+
+    private void RemoveFromCart(NewDishOrder dishOrder)
+    {
+        newOrder.DishOrders.Remove(dishOrder);
+        UpdateDishesForView();
     }
 }

@@ -101,7 +101,7 @@ namespace Server.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Opened = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Closed = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CloseDescription = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
+                    CloseDescription = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
                     ApplicationUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TableId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },

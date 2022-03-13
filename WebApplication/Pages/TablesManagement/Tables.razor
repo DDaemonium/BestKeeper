@@ -35,7 +35,7 @@ else
                 <tr>
                     <td><a href="@($"tables/edit?id={table.Id}")">Открыть</a></td>
                     <td>@table.Name</td>
-                    <td>@if(table.IsReserved)
+                    <td>@if(!table.IsReserved)
                         {
                             <button @onclick=@(() => ChangeTableReservation(table)) type="button" class="btn alert-danger">Забронировать</button>
                         }

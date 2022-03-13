@@ -21,6 +21,9 @@
         [HttpGet]
         public async Task<IActionResult> GetAll() => Ok(await _tableService.GetTablesAsync());
 
+        [HttpGet("available")]
+        public async Task<IActionResult> GetAvailable() => Ok(await _tableService.GetAvailableTablesAsync());
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id) => Ok(await _tableService.GetTableAsync(id));
 

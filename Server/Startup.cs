@@ -27,6 +27,7 @@
             services.AddScoped<CategoryService>();
             services.AddScoped<DishService>();
             services.AddScoped<TableService>();
+            services.AddScoped<OrderService>();
 
             // Add services to the container.
             services.AddControllers();

@@ -203,7 +203,6 @@ namespace Server.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CloseDescription")
-                        .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
 

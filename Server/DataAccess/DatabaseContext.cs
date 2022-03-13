@@ -61,7 +61,7 @@
 
             modelBuilder.Entity<Order>(e => {
                 e.HasKey(k => k.Id);
-                e.Property(p => p.CloseDescription).HasMaxLength(512).IsRequired();
+                e.Property(p => p.CloseDescription).HasMaxLength(512);
 
                 e.HasOne(u => u.ApplicationUser).WithMany(r => r.Orders)
                     .HasForeignKey(up => up.ApplicationUserId).OnDelete(DeleteBehavior.ClientNoAction);
