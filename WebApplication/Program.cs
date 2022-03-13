@@ -20,6 +20,7 @@ builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<DishService>();
 builder.Services.AddScoped<TableService>();
+builder.Services.AddScoped<OrderService>();
 
 builder.Services.AddBlazoredLocalStorage();
 

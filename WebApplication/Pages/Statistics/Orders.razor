@@ -1,19 +1,59 @@
 ﻿@page "/orders"
 @using Domain.Data.Identity
+@using Domain.Dto.Response.Order
 @using SharedApplicationsData.Service.Identity
+@using WebApplication.Service.Management
 
 @inject IdentityManager IdentityManager
+@inject OrderService OrderService
 
 <PageTitle>Статистика заказов</PageTitle>
 
 <h3>Статистика заказов</h3>
 
+@if (orders is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table" style="max-width:600px;">
+        <thead>
+            <tr>
+                <th>Детали</th>
+                <th style="min-width:200px;">Дата открытия</th>
+                <th>Стол</th>
+                <th style="min-width:200px;">Официант</th>
+                <th style="min-width:200px;">Дата закрытия</th>
+                <th style="min-width:150px;">Сумма ₽</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var openedOrder in orders)
+            {
+                <tr>
+                    <td><a href="@($"/orders/view?id={openedOrder.Id}")">Открыть</a></td>
+                    <td>@openedOrder.Opened</td>
+                    <td>@openedOrder.TableName</td>
+                    <td>@openedOrder.OwnerFullName</td>
+                    <td>@(openedOrder.Closed == null ? "Открыт" : openedOrder.Closed.ToString())</td>
+                    <td>@(openedOrder.Dishes.Sum(d => d.Cost * d.Count).ToString("#.##"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 @code {
+    private List<OrderInfo>? orders;
+
     protected override async Task OnInitializedAsync()
     {
         if (!IdentityManager.CheckAuthorizationWithRedirect(RoleConstants.Administrator, RoleConstants.Manager))
         {
             return;
         }
+
+        orders = await OrderService.GetOrdersAsync();
     }
 }
