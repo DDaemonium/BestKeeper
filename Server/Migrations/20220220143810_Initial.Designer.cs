@@ -210,7 +210,6 @@ namespace Server.Migrations
                         .HasColumnType("nvarchar(512)");
 
                     b.Property<DateTime>("Closed")
-                        .IsRequired(false)
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("Opened")
